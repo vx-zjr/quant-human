@@ -21,7 +21,7 @@
 | 解读 | 在人群中处于什么位置？ | 测量 + 常模、百分位、生物年龄 | `/present` |
 | 解释 | 为什么会这样？ | 方差分解、因果识别 | `/past` |
 | 解析 | 各部分如何相互作用？ | 系统动力学、反馈、混沌 | `/limits`（因果图在路线图中） |
-| 预测 | 接下来会怎样？ | 生存分析、蒙特卡洛、校准 | `/future` `/ledger` |
+| 预测 | 接下来会怎样？ | 生存分析、蒙特卡洛、个人贝叶斯行为模型、校准 | `/future` `/behavior` `/ledger` |
 
 ---
 
@@ -72,6 +72,7 @@ src/
     frameworks.ts           # 理论框架库
     predictability.ts       # 可预测性证据、ACE 分解、信息尺度
     personas.ts             # 虚构演示人物
+    behaviors.ts            # 行为库、情境特征先验、预测力证据
     instruments/            # 问卷题目、常模、生活事件目录
   engine/                   # —— 纯函数计算，必须有测试 ——
     stats.ts                # 数学/统计工具、随机数
@@ -83,12 +84,16 @@ src/
     scoring.ts              # 问卷计分、价值观、八层综合分
     interpret.ts            # 规则式解读
     ledger.ts               # Brier 分数与校准
-    engine.test.ts          # 测试（含数据完整性检查）
-  store/                    # Zustand 持久化存储（profile、ledger）
-  hooks/useAnalysis.ts      # 画像 → 全部派生计算
-  components/               # EChart 封装、chartStyle 图表样式、cx、通用 UI、画像切换器
+    linalg.ts               # 小型线性代数（Cholesky 求解/求逆）
+    behavior.ts             # 个人贝叶斯逻辑回归：先验、后验、预测、分解、杠杆、序贯评估
+    behaviorSim.ts          # 演示人物的模拟行为日志
+    infotheory.ts           # 熵、LZ 熵率、Fano 可预测性上限、Epstein 聚合
+    *.test.ts               # 测试（含数据完整性检查）
+  store/                    # Zustand 持久化存储（profile、ledger、behavior）
+  hooks/                    # useAnalysis（画像派生）、useBehaviorData / useBehaviorForecasts（行为预测）
+  components/               # EChart 封装、chartStyle 图表样式、cx、通用 UI、画像切换器；behavior/ 行为预测页组件
                             # （.tsx 文件只导出组件，工具函数放 .ts，以保证 Fast Refresh）
-  pages/                    # 10 个页面
+  pages/                    # 11 个页面
 .github/workflows/deploy.yml # 推送 main → 检查 → 发布到 GitHub Pages
 docs/METHODOLOGY.md         # 模型公式、参数与假设的详细说明
 ROADMAP.md                  # 待办（按优先级），迭代时从这里取任务
@@ -152,7 +157,16 @@ CHANGELOG.md                # 每轮迭代的记录
 2. 在 `src/App.tsx` 的 `GROUPS` 中注册（路径、标签、副标题、图标、是否依赖画像 `personal`）；
 3. 页面结构：`PageHeader`（含 kicker 指明对应动词）→ 若干 `Section`；每张图用 `ChartCard` 并提供 `table` 视图。
 
-### 5.7 图表规范（来自 dataviz 方法）
+### 5.7 新增一个可预测的行为
+在 `src/data/behaviors.ts` 的 `BEHAVIORS` 中追加：
+- `question` 写成可明确判定“做了/没做”的问题，`window` 为 day / week / month；
+- `baseRate` 无可靠人群数据时写示意值并在 `baseRateNote` 注明；
+- `traits` 填文献中的特质–行为相关 r（引擎会自动按单次行为减半），没有就不填；
+- `priors` 只为有理由的情境写先验均值（log-odds），其余留给个人数据学习；
+- 想避免的行为设 `avoid: true`（意图/计划的先验方向会自动翻转）；
+- 测试会检查 id 唯一、概率合法、情境键合法、文献存在。新增情境特征需同时改 `ContextKey`、`CONTEXT_META`、`CONTEXT_KEYS` 与模拟器。
+
+### 5.8 图表规范（来自 dataviz 方法）
 - 颜色只用 `useChartTheme()` 返回的令牌：`t.series[0..7]`（固定顺序的分类色）、`t.layer.L0..L7`、`t.ink/ink2/muted/grid/axis`；**不要硬编码颜色**。
 - 分类色按固定顺序分配，不循环、不超过 8 个；散点/气泡图同屏最多 3 个类别。
 - 单一坐标轴（禁止双 y 轴）；网格线为实线细线；不在每个数据点上标数字。
@@ -190,6 +204,7 @@ CHANGELOG.md                # 每轮迭代的记录
 - 大五常模为英文样本近似值；20 题问卷中文版未经心理测量学验证。
 - 八层综合分是透明的启发式，不是经过验证的量表。
 - L1 分子层目前没有用户数据入口。
+- 行为预测为逐行为独立的逻辑回归（无层级共享、无时间趋势）；多数行为的人群基础率与情境先验为示意值；演示日志由同族模型模拟，学习效果偏乐观。
 
 详见 `docs/METHODOLOGY.md`。
 
@@ -197,8 +212,8 @@ CHANGELOG.md                # 每轮迭代的记录
 
 ## 9. 当前状态
 
-- **版本**：v0.1.1（2026-10-12）
+- **版本**：v0.2.0（2026-10-12）
 - **线上**：<https://vx-zjr.github.io/quant-human/> · 仓库 <https://github.com/vx-zjr/quant-human>
-- **规模**：8 层 · 126 个维度 · 17 个理论框架 · 197 条文献 · 10 个页面 · 4 个演示人物
-- **已实现**：总览、维度图谱、理论框架、个人画像（含 20 题大五问卷）、过去（里程表 / 时间轴 / ACE / 细胞年龄）、现在（八层仪表盘 / 规则解读 / 身体 / 人格 / 价值观 / 时间 / 邓巴圈）、未来（生存曲线 / 杠杆排序 / 情景滑块 / 蒙特卡洛平行人生）、可预测性极限（洛伦兹 / 信息尺度 / 缺失遗传度 / 预测研究 / 地平线 / 反身性实验室）、预测账本（Brier / 校准曲线）、看法与建议
-- **下一步建议**：见 `ROADMAP.md` 的 v0.2「测量更准」
+- **规模**：8 层 · 128 个维度 · 17 个理论框架 · 218 条文献 · 11 个页面 · 4 个演示人物 · 28 个可预测行为 · 28 个单元测试
+- **已实现**：总览、维度图谱、理论框架、个人画像（含 20 题大五问卷）、过去（里程表 / 时间轴 / ACE / 细胞年龄）、现在（八层仪表盘 / 规则解读 / 身体 / 人格 / 价值观 / 时间 / 邓巴圈）、未来（生存曲线 / 杠杆排序 / 情景滑块 / 蒙特卡洛平行人生）、可预测性极限（洛伦兹 / 信息尺度 / 缺失遗传度 / 预测研究 / 地平线 / 反身性实验室）、行为预测（行为天气预报 / 个人贝叶斯模型 / 贡献分解与杠杆 / 序贯评估 / Fano 上限 / 聚合实验室 / 打卡与自定义行为）、预测账本（Brier / 校准曲线）、看法与建议
+- **下一步建议**：`ROADMAP.md` v0.2 剩余项（层级模型、时间结构、行为耦合），或 v0.3「测量更准」

@@ -218,3 +218,65 @@ export interface Forecast {
   dueAt: string
   outcome: 'pending' | 'yes' | 'no'
 }
+
+/* ----------------------------- 具体行为预测 ----------------------------- */
+
+export type BehaviorCategory = 'health' | 'work' | 'digital' | 'social' | 'emotion' | 'money'
+
+/** 情境特征：每一次“要不要做”发生时的上下文 */
+export type ContextKey = 'weekend' | 'shortSleep' | 'highStress' | 'withOthers' | 'intention' | 'plan' | 'yesterday' | 'freshStart'
+
+export interface BehaviorContext {
+  weekend: 0 | 1
+  /** 前一晚睡眠不足（< 6.5 小时） */
+  shortSleep: 0 | 1
+  /** 当天压力大（≥ 7/10） */
+  highStress: 0 | 1
+  /** 当时和别人在一起 */
+  withOthers: 0 | 1
+  /** 事先的意图强度 0..10（5 = 无所谓/未知） */
+  intention: number
+  /** 有具体的“如果……就……”执行计划 */
+  plan: 0 | 1
+  /** 上一个周期是否做了（习惯惯性） */
+  yesterday: 0 | 1
+  /** 新起点日：周一、月初、节后 */
+  freshStart: 0 | 1
+}
+
+export interface BehaviorDef {
+  id: string
+  name: string
+  category: BehaviorCategory
+  /** 预测窗口 */
+  window: 'day' | 'week' | 'month'
+  /** 以问题形式表述 */
+  question: string
+  /** 人群基础概率（先验） */
+  baseRate: number
+  /** 基础概率的依据；无文献时写“示意” */
+  baseRateNote: string
+  /** 与大五人格的相关（点二列 r 的量级） */
+  traits?: Partial<Record<BigFiveKey, number>>
+  /** 情境效应的先验均值（log-odds） */
+  priors?: Partial<Record<ContextKey, number>>
+  /** 是否高度习惯化（在稳定情境中高频重复） */
+  habitual: boolean
+  /** 通常想避免的行为：此时“意图/计划”指“想避免/有避免计划”，引擎会翻转其先验符号 */
+  avoid?: boolean
+  sources?: SourceId[]
+  custom?: boolean
+}
+
+export interface BehaviorObs {
+  id: string
+  behaviorId: string
+  /** YYYY-MM-DD */
+  date: string
+  did: 0 | 1
+  ctx: BehaviorContext
+  /** 记录时模型给出的概率（用于事后校准） */
+  modelP?: number
+  /** 记录时你自己的直觉概率 */
+  selfP?: number
+}

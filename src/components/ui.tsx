@@ -46,7 +46,7 @@ export function Card({
   pad?: boolean
 }) {
   return (
-    <div className={cx('rounded-xl border border-line bg-surface', pad && 'p-4 md:p-5', className)}>
+    <div className={cx('min-w-0 rounded-xl border border-line bg-surface', pad && 'p-4 md:p-5', className)}>
       {(title || action) && (
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="min-w-0">

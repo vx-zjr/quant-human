@@ -3,6 +3,7 @@ import {
   Atom,
   BookOpen,
   Compass,
+  Crosshair,
   Gauge,
   History,
   Infinity as InfinityIcon,
@@ -27,6 +28,7 @@ import ProfilePage from './pages/Profile'
 import Past from './pages/Past'
 import Present from './pages/Present'
 import Future from './pages/Future'
+import Behavior from './pages/Behavior'
 import Limits from './pages/Limits'
 import Ledger from './pages/Ledger'
 import Frameworks from './pages/Frameworks'
@@ -58,6 +60,7 @@ const GROUPS: { title: string; routes: RouteDef[] }[] = [
       { path: '/past', label: '过去 · 解构', sub: '你是如何形成的', icon: History, page: Past, personal: true },
       { path: '/present', label: '现在 · 解读', sub: '八层仪表盘', icon: Gauge, page: Present, personal: true },
       { path: '/future', label: '未来 · 预测', sub: '概率与情景', icon: Telescope, page: Future, personal: true },
+      { path: '/behavior', label: '行为预测', sub: '你下一次会怎么做', icon: Crosshair, page: Behavior, personal: true },
     ],
   },
   {
@@ -139,7 +142,7 @@ export default function App() {
         <div className="border-t border-line px-4 py-3">
           <ThemeToggle />
           <p className="mt-3 text-[11px] leading-relaxed text-muted">
-            v0.1.1 · 所有数据仅保存在本机浏览器。
+            v0.2.0 · 所有数据仅保存在本机浏览器。
             <br />
             非医疗/心理诊断工具。
           </p>
