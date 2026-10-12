@@ -1,0 +1,42 @@
+{
+  "name": "quant-human",
+  "private": true,
+  "version": "0.1.1",
+  "type": "module",
+  "description": "人类量化图谱 · Quantified Human Atlas —— 从原子到意义，解构、解读、解释、解析、预测一个人",
+  "homepage": "https://vx-zjr.github.io/quant-human/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vx-zjr/quant-human.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "echarts": "^6.1.0",
+    "lucide-react": "^1.55.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  },
+  "packageManager": "pnpm@11.23.0",
+  "engines": {
+    "node": ">=22.12"
+  }
+}

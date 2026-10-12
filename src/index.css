@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+/*
+ * 设计令牌（Design tokens）
+ * 颜色取自经过色盲/对比度校验的参考调色板（dataviz skill · references/palette.md）。
+ * 深色为默认；浅色由 data-theme="light" 或系统偏好触发。改颜色只改这里。
+ */
+:root {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --surface-3: #2c2c2a;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* 8 个层级 = 8 个分类色，固定顺序（顺序本身是色盲安全机制） */
+  --l0: #3987e5;
+  --l1: #d95926;
+  --l2: #199e70;
+  --l3: #c98500;
+  --l4: #d55181;
+  --l5: #008300;
+  --l6: #9085e9;
+  --l7: #e66767;
+
+  --accent: #3987e5;
+  --accent-soft: rgba(57, 135, 229, 0.16);
+  --neutral-mid: #383835;
+
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:where(:not([data-theme="dark"])) {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --surface-2: #f1f0ec;
+    --surface-3: #e8e7e2;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --axis: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.1);
+    --border-strong: rgba(11, 11, 11, 0.18);
+    --l0: #2a78d6;
+    --l1: #eb6834;
+    --l2: #1baf7a;
+    --l3: #eda100;
+    --l4: #e87ba4;
+    --l5: #008300;
+    --l6: #4a3aa7;
+    --l7: #e34948;
+    --accent: #2a78d6;
+    --accent-soft: rgba(42, 120, 214, 0.12);
+    --neutral-mid: #f0efec;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f1f0ec;
+  --surface-3: #e8e7e2;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.18);
+  --l0: #2a78d6;
+  --l1: #eb6834;
+  --l2: #1baf7a;
+  --l3: #eda100;
+  --l4: #e87ba4;
+  --l5: #008300;
+  --l6: #4a3aa7;
+  --l7: #e34948;
+  --accent: #2a78d6;
+  --accent-soft: rgba(42, 120, 214, 0.12);
+  --neutral-mid: #f0efec;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-serious: var(--serious);
+  --color-critical: var(--critical);
+  --font-sans: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+    "Microsoft YaHei", sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 长文排版 */
+.prose-qh p {
+  margin: 0.6em 0;
+  color: var(--ink-2);
+}
+.prose-qh h3 {
+  margin: 1.4em 0 0.4em;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.prose-qh ul {
+  margin: 0.5em 0;
+  padding-left: 1.2em;
+  list-style: disc;
+  color: var(--ink-2);
+}
+.prose-qh li {
+  margin: 0.25em 0;
+}
+.prose-qh strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 范围滑块 */
+input[type="range"].qh-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  outline: none;
+}
+input[type="range"].qh-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  cursor: pointer;
+}
+input[type="range"].qh-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  cursor: pointer;
+}
+input[type="range"].qh-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.qh-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--ink);
+  font-size: 0.875rem;
+}
+.qh-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+@keyframes qh-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  15% {
+    transform: scale(1.18);
+    opacity: 0.85;
+  }
+}
+.qh-heartbeat {
+  animation: qh-pulse 0.85s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qh-heartbeat {
+    animation: none;
+  }
+}
